@@ -22,10 +22,10 @@ function Init()
     {
         document.write("<tr>");
             document.write("<td>"+ a +"</td>");
-            document.write("<td> <input type='checkbox' id='f_up" + a + "'/> </td>");
-            document.write("<td> <input type='checkbox' id='f_down" + a + "'/> </td>");
-            document.write("<td> <input type='radio' name='person' id='e_up" + a + "'/> <input type='radio' name='person' id='e_down" + a + "'/> </td>");
-            document.write("<td> <input type='radio' name='elevator' id='p_up" + a + "'/> <input type='radio' name='elevator' id='p_down" + a + "'/> </td>");
+            document.write("<td> <input type='checkbox' name='f[]' id='f_up" + a + "' value=" + a +"> </td>");
+            document.write("<td> <input type='checkbox' name='f[]' id='f_down" + a + "' value=" + -a +"> </td>");
+            document.write("<td> <input type='radio' name='elevator' id='p_up" + a + "' value = " + a + "> <input type='radio' name='elevator' id='p_down" + a + "' value = " + -a + "> </td>");
+            document.write("<td> <input type='radio' name='person' id='e_up" + a + "' value = " + a + "><input type='radio' name='person' id='e_down" + a + "' value = " + -a + "> </td>");
         document.write("</tr>");
     }
     document.write("</table>");
@@ -44,28 +44,56 @@ function Calc()
     var travellingPlan = GetTravellingPlan();
     var position = GetPosition();
     var target = GetTarget();
-
+    debugger;
     var result = ServiceTimeEstimate(travellingPlan, position, target);
 
     alert("Arriving time is: " + result);
 }
 
+//function to get positions based data (postion and target)
+function GetData(elementname)
+{
+    var position = {position: null, direction:0}
+    var elevator = document.getElementsByName( elementname );
+    elevator.forEach( e=> {
+        if(e.checked)
+        {
+            position.position = Math.abs(e.value);
+            var isGoingDown = e.value.charAt(0) == '-';
+            if (isGoingDown)  position.direction = -1;
+            else position.direction = 1;
+        }
+    });
+
+    return position;
+}
+
 //gets the travelling plan
 function GetTravellingPlan()
-{
-    return 0;
+{   
+    var up = [];
+    var down = [];
+    var stops = document.getElementsByName( "f[]" );
+    stops.forEach( e => {
+        if (e.checked) {
+            if (e.value >= 0) up.push(Math.abs(e.value));
+            else down.push( Math.abs(e.value));
+        }
+    });
+    return { up: up, down: down }
+
 }
 
 //gets the position and direction
 function GetPosition()
 {
-    return 0;
+    return GetData("elevator");
 }
 
 //get the target position and direction
 function GetTarget()
 {
-    return 0;
+    return GetData("person");
 }
 
 //the estimate function
