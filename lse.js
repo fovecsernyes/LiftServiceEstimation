@@ -44,7 +44,7 @@ function Calc()
     var travellingPlan = GetTravellingPlan();
     var position = GetPosition();
     var target = GetTarget();
-    debugger;
+
     var result = ServiceTimeEstimate(travellingPlan, position, target);
 
     alert("Arriving time is: " + result);
@@ -53,15 +53,12 @@ function Calc()
 //function to get positions based data (postion and target)
 function GetData(elementname)
 {
-    var position = {position: null, direction:0}
+    var position = null;
     var elevator = document.getElementsByName( elementname );
     elevator.forEach( e=> {
         if(e.checked)
         {
-            position.position = Math.abs(e.value);
-            var isGoingDown = e.value.charAt(0) == '-';
-            if (isGoingDown)  position.direction = -1;
-            else position.direction = 1;
+            position = Number(e.value);
         }
     });
 
@@ -76,11 +73,12 @@ function GetTravellingPlan()
     var stops = document.getElementsByName( "f[]" );
     stops.forEach( e => {
         if (e.checked) {
-            if (e.value >= 0) up.push(Math.abs(e.value));
-            else down.push( Math.abs(e.value));
+            if (e.value >= 0) up.push(Number(e.value));
+            else down.push( Number(e.value));
         }
     });
-    return { up: up, down: down }
+
+    return { up: up.sort(), down: down }
 
 }
 
@@ -99,7 +97,68 @@ function GetTarget()
 //the estimate function
 function ServiceTimeEstimate(travellingPlan, position, target)
 {
-    return 1;
+    //if the call is on the same floor as the elevator
+    if(position === target) return 0;
+
+    var plan = AssambleTravellingPlan(travellingPlan, position);
+    
+    if( plan.length == 0) return Math.abs( Math.abs(position) - Math.abs(target) ) * _travelTime;
+
+    var time = 0;
+    
+    var targetDirection = target >= 0 ? 1 : -1;
+
+    time += (Math.abs ( Math.abs(position) - Math.abs(plan[0]) ) - 1) * _travelTime;
+
+    for(var i = 0; i < plan.length-1 ; i++)
+    {
+        var direction = Math.abs( plan[i] ) < Math.abs( plan[i + 1] ) ? 1 : -1;
+
+        if (plan[i] !== 0) time += GetStandingTime();
+
+        for(var j = Math.abs(plan[i]); j !== Math.abs(plan[i+1]); j = j + direction)
+        {
+            time += _travelTime;
+            if( j === Math.abs(target) && direction === targetDirection ) return time;
+        }
+
+    };
+
+    time += Math.abs ( Math.abs(position) - Math.abs(plan[plan.length -1]) ) * _travelTime;
+
+    return time;
+
+    
+}
+
+//assamble travelling plan based on travellingplan and position
+function AssambleTravellingPlan(travellingPlan, position)
+{
+    plan = []
+    if(position >= 0)
+    {
+        travellingPlan.up.forEach(e => {
+            if (position <= e)
+            {
+                plan.push(e);
+            }
+        });
+        travellingPlan.up = travellingPlan.up.filter(n => !plan.includes(n));
+        plan = plan.concat(travellingPlan.down);
+        plan = plan.concat(travellingPlan.up);
+    }else
+    {
+        travellingPlan.down.forEach(e => {
+            if (position >= e)
+            {
+                plan.push(e);
+            }
+        });
+        travellingPlan.down = travellingPlan.down.filter(n => !plan.includes(n));
+        plan = plan.concat(travellingPlan.up);
+        plan = plan.concat(travellingPlan.down);
+    }
+    return plan;
 }
 
 //function to be executed when initializing the app
