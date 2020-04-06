@@ -1,0 +1,16 @@
+<script src="tinytest.js"></script>
+<script src="lse.js"></script>
+<script>
+ tests({
+
+   'assamble travelling plan': function() {
+     eq("7,9,-5,0", AssambleTravellingPlan({"up":[0,7,9],"down":[-5]}, 4));
+     eq("-3,-2,-1,2,5,8,-7", AssambleTravellingPlan({"up":[2,5,8],"down":[-7,-3,-2,-1]}, -4));
+   },
+
+   'service time estimation': function() {
+     eq(93, ServiceTimeEstimate({"up":[0,7,9],"down":[-5]},4,-3));
+     eq(127, ServiceTimeEstimate({"up":[2,5,8],"down":[-7,-3,-2,-1]},-4,7));
+   },
+ });
+</script>

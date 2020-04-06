@@ -101,7 +101,6 @@ function ServiceTimeEstimate(travellingPlan, position, target)
     if(position === target) return 0;
 
     var plan = AssambleTravellingPlan(travellingPlan, position);
-    
     if( plan.length == 0) return Math.abs( Math.abs(position) - Math.abs(target) ) * _travelTime;
 
     var time = 0;
@@ -125,7 +124,6 @@ function ServiceTimeEstimate(travellingPlan, position, target)
     };
 
     time += Math.abs ( Math.abs(position) - Math.abs(plan[plan.length -1]) ) * _travelTime;
-
     return time;
 
     
@@ -137,29 +135,30 @@ function AssambleTravellingPlan(travellingPlan, position)
     plan = []
     if(position >= 0)
     {
-        travellingPlan.up.forEach(e => {
+        for (var i = 0; i < travellingPlan.up.length; i++)
+        {
+            var e = travellingPlan.up[i];
             if (position <= e)
             {
                 plan.push(e);
             }
-        });
+        }
         travellingPlan.up = travellingPlan.up.filter(n => !plan.includes(n));
         plan = plan.concat(travellingPlan.down);
         plan = plan.concat(travellingPlan.up);
     }else
     {
-        travellingPlan.down.forEach(e => {
-            if (position >= e)
+        for (var i = 0; i < travellingPlan.down.length; i++)
+        {
+            var e = travellingPlan.down[i];
+            if (position <= e)
             {
                 plan.push(e);
             }
-        });
+        }
         travellingPlan.down = travellingPlan.down.filter(n => !plan.includes(n));
         plan = plan.concat(travellingPlan.up);
-        plan = plan.concat(travellingPlan.down);
+        plan = plan.concat(travellingPlan.down.filter(n => !plan.includes(n)));
     }
     return plan;
 }
-
-//function to be executed when initializing the app
-Init();
